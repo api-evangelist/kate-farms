@@ -1,0 +1,68 @@
+generated: '2026-08-04'
+method: searched
+source: live probes of /.well-known/* on every Kate Farms host
+hosts:
+- host: https://shop.katefarms.com
+  documents:
+  - path: /.well-known/openid-configuration
+    status: 200
+    content_type: application/json
+    file: kate-farms-openid-configuration.json
+    note: Shopify Customer Accounts OIDC discovery; issuer https://shopify.com/authentication/2056802
+  - path: /.well-known/oauth-authorization-server
+    status: 200
+    content_type: application/json
+    file: kate-farms-oauth-authorization-server.json
+    note: RFC 8414 authorization server metadata (identical body to the OIDC document)
+  - path: /.well-known/oauth-protected-resource
+    status: 200
+    content_type: application/json
+    file: kate-farms-oauth-protected-resource.json
+    note: RFC 9728 protected resource metadata; resource https://shop.katefarms.com
+  - path: /.well-known/ucp
+    status: 200
+    content_type: application/json
+    file: kate-farms-ucp.json
+    note: Universal Commerce Protocol merchant profile; declares the MCP transport
+      endpoint, shopping capabilities and payment handlers
+  - path: /.well-known/apple-app-site-association
+    status: 200
+    content_type: application/json
+    note: empty applinks/webcredentials declaration; not captured
+  - path: /.well-known/assetlinks.json
+    status: 200
+    content_type: application/json
+    note: empty array; not captured
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404
+  - path: /.well-known/agent-card.json
+    status: 404
+  - path: /.well-known/agent.json
+    status: 404
+  - path: /.well-known/mcp.json
+    status: 404
+- host: https://katefarms.com
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/ucp
+    status: 404
+  - path: /.well-known/agent-card.json
+    status: 404
+  - path: /.well-known/agent.json
+    status: 404
+notes:
+- No RFC 9116 security.txt is published on any Kate Farms host.
+- No A2A Agent Card was found at either the canonical /.well-known/agent-card.json
+  or the legacy /.well-known/agent.json path on any host; nothing was authored in
+  a2a/ as a result.
+- The corporate site katefarms.com is a Nuxt application and returns real 404s for
+  unknown paths, so the misses above are genuine, not SPA catch-alls.
+x-evidence:
+  fetched: '2026-08-04'

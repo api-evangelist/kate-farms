@@ -1,0 +1,130 @@
+generated: '2026-08-04'
+method: searched
+status: published
+source: https://shop.katefarms.com/.well-known/ucp
+server:
+  name: kate-farms-ucp-shopping
+  transport: http
+  url: https://shop.katefarms.com/api/ucp/mcp
+  canonical_url: https://kftest-bis.myshopify.com/api/ucp/mcp
+  protocol: Universal Commerce Protocol (UCP)
+  protocol_versions:
+  - '2026-04-08'
+  - '2026-01-23'
+  protocol_spec: https://ucp.dev/2026-04-08/specification/overview/
+  service: dev.ucp.shopping
+  schema: https://ucp.dev/2026-04-08/services/shopping/mcp.openrpc.json
+  platform: Shopify
+introspection:
+  attempted: '2026-08-04'
+  method: 'POST {"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+  http_status: 422
+  gated: true
+  error:
+    code: -32001
+    message: UCP discovery failed
+    data_code: invalid_profile_url
+    detail: 'Unable to fetch agent profile: Missing profile uri'
+  note: The server requires a resolvable UCP agent profile URI before it answers tools/list,
+    so live tool input schemas could not be retrieved anonymously. The tool names below
+    are the ones Kate Farms itself publishes in its agents.md / llms.txt agent flow;
+    their argument schemas are defined by the UCP shopping OpenRPC schema linked above,
+    not authored here.
+tools:
+- name: search_catalog
+  description: Find products in the Kate Farms catalog matching a buyer's intent.
+  capability: dev.ucp.shopping.catalog.search
+  source: https://shop.katefarms.com/agents.md
+  input_schema: not retrieved (tools/list gated)
+- name: create_cart
+  description: Create a cart and add the desired items.
+  capability: dev.ucp.shopping.cart
+  source: https://shop.katefarms.com/agents.md
+  input_schema: not retrieved (tools/list gated)
+- name: create_checkout
+  description: Start the purchase flow from a cart.
+  capability: dev.ucp.shopping.checkout
+  source: https://shop.katefarms.com/agents.md
+  input_schema: not retrieved (tools/list gated)
+- name: update_checkout
+  description: Set the shipping address and shipping method on a checkout.
+  capability: dev.ucp.shopping.fulfillment
+  source: https://shop.katefarms.com/agents.md
+  input_schema: not retrieved (tools/list gated)
+- name: complete_checkout
+  description: Finalize the purchase. Requires contemporaneous buyer approval of payment.
+  capability: dev.ucp.shopping.checkout
+  source: https://shop.katefarms.com/agents.md
+  input_schema: not retrieved (tools/list gated)
+capabilities:
+- id: dev.ucp.shopping.catalog.search
+  version: '2026-04-08'
+  schema: https://ucp.dev/2026-04-08/schemas/shopping/catalog_search.json
+- id: dev.ucp.shopping.catalog.lookup
+  version: '2026-04-08'
+  schema: https://ucp.dev/2026-04-08/schemas/shopping/catalog_lookup.json
+- id: dev.ucp.shopping.cart
+  version: '2026-04-08'
+  schema: https://ucp.dev/2026-04-08/schemas/shopping/cart.json
+- id: dev.ucp.shopping.checkout
+  version: '2026-04-08'
+  schema: https://ucp.dev/2026-04-08/schemas/shopping/checkout.json
+- id: dev.ucp.shopping.discount
+  version: '2026-04-08'
+  schema: https://ucp.dev/2026-04-08/schemas/shopping/discount.json
+- id: dev.ucp.shopping.fulfillment
+  version: '2026-04-08'
+  schema: https://ucp.dev/2026-04-08/schemas/shopping/fulfillment.json
+  config:
+    allows_multi_destination_shipping: false
+    allows_method_combinations:
+    - - shipping
+- id: dev.ucp.shopping.order
+  version: '2026-04-08'
+  schema: https://ucp.dev/2026-04-08/schemas/shopping/order.json
+- id: dev.shopify.catalog
+  version: '2026-04-08'
+  schema: https://shopify.dev/ucp/schemas/2026-04-08/shopify_catalog.json
+  extends:
+  - dev.ucp.shopping.catalog.search
+  - dev.ucp.shopping.catalog.lookup
+payment_handlers:
+- id: gpay
+  handler: com.google.pay
+  version: '2026-01-11'
+  merchant_name: Kate Farms
+  merchant_origin: shop.katefarms.com
+  card_networks:
+  - VISA
+  - MASTERCARD
+  - AMEX
+  - DISCOVER
+- id: shopify.card
+  handler: dev.shopify.card
+  version: '2026-01-15'
+  card_brands:
+  - visa
+  - master
+  - american_express
+  - discover
+  - diners_club
+- id: shop_pay
+  handler: dev.shopify.shop_pay
+  version: '2026-04-08'
+rules:
+- Checkout requires contemporaneous human approval; agents must not complete payment
+  without explicit buyer consent (stated in agents.md).
+- The MCP endpoint is rate-limited per IP; back off on 429 (stated in agents.md).
+- Agents should pass context.address_country and context.currency for accurate pricing
+  and availability (stated in agents.md).
+x-evidence:
+- url: https://shop.katefarms.com/.well-known/ucp
+  http_status: 200
+  content_type: application/json
+  file: well-known/kate-farms-ucp.json
+- url: https://shop.katefarms.com/api/ucp/mcp
+  http_status: 422
+  note: tools/list gated on agent profile
+- url: https://shop.katefarms.com/agents.md
+  http_status: 200
+  file: llms/kate-farms-agents.md

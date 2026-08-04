@@ -1,0 +1,171 @@
+generated: '2026-08-04'
+method: derived
+source: graphql/kate-farms-storefront.graphql
+note: Entity graph derived mechanically from the introspected Storefront GraphQL schema
+  — object fields whose base type is another object become relationships, Relay Connection
+  return types become has_many. Only entities that exist verbatim in the schema are
+  listed.
+identifier_scheme:
+  format: base64-encoded Shopify GID
+  example_shape: gid://shopify/ProductVariant/{numeric_id}
+  interface: Node (id, resolvable through the root node/nodes fields)
+entities:
+- name: Product
+  description: A Kate Farms formula or shake product listing.
+  fields: 36
+  relationships:
+  - {kind: has_many, target: ProductVariant, via: variants}
+  - {kind: has_one, target: ProductVariant, via: selectedOrFirstAvailableVariant}
+  - {kind: has_many, target: Collection, via: collections}
+  - {kind: has_many, target: Image, via: images}
+  - {kind: has_one, target: Image, via: featuredImage}
+  - {kind: has_many, target: Media, via: media}
+  - {kind: has_many, target: SellingPlanGroup, via: sellingPlanGroups}
+  - {kind: has_one, target: ProductPriceRange, via: priceRange}
+  - {kind: has_one, target: ProductPriceRange, via: compareAtPriceRange}
+  - {kind: has_one, target: TaxonomyCategory, via: category}
+  - {kind: has_many, target: Metafield, via: metafields}
+  - {kind: has_one, target: SEO, via: seo}
+- name: ProductVariant
+  description: A purchasable SKU — for Kate Farms, a flavour plus case size (e.g. Plain
+    / Case of 12).
+  fields: 30
+  relationships:
+  - {kind: belongs_to, target: Product, via: product}
+  - {kind: has_one, target: MoneyV2, via: price}
+  - {kind: has_one, target: MoneyV2, via: compareAtPrice}
+  - {kind: has_one, target: MoneyV2, via: unitPrice}
+  - {kind: has_one, target: QuantityRule, via: quantityRule}
+  - {kind: has_many, target: QuantityPriceBreak, via: quantityPriceBreaks}
+  - {kind: has_many, target: SellingPlanAllocation, via: sellingPlanAllocations}
+  - {kind: has_many, target: StoreAvailability, via: storeAvailability}
+  - {kind: has_many, target: ProductVariantComponent, via: components}
+  - {kind: has_one, target: Image, via: image}
+  note: quantityRule is load-bearing for Kate Farms — products sell by the case, so
+    minimum/maximum/increment govern any valid cart line.
+- name: Collection
+  description: A merchandised grouping such as tube-feeding formulas or nutrition shakes.
+  fields: 13
+  relationships:
+  - {kind: has_many, target: Product, via: products}
+  - {kind: has_one, target: Image, via: image}
+  - {kind: has_one, target: SEO, via: seo}
+- name: Cart
+  description: An in-progress order. The central mutable entity of the agentic commerce
+    flow.
+  fields: 19
+  relationships:
+  - {kind: has_many, target: BaseCartLine, via: lines}
+  - {kind: has_one, target: CartBuyerIdentity, via: buyerIdentity}
+  - {kind: has_one, target: CartCost, via: cost}
+  - {kind: has_one, target: CartDelivery, via: delivery}
+  - {kind: has_many, target: CartDeliveryGroup, via: deliveryGroups}
+  - {kind: has_many, target: CartDiscountCode, via: discountCodes}
+  - {kind: has_many, target: CartDiscountAllocation, via: discountAllocations}
+  - {kind: has_many, target: AppliedGiftCard, via: appliedGiftCards}
+  - {kind: has_many, target: Metafield, via: metafields}
+  key_fields:
+  - id
+  - checkoutUrl
+  - totalQuantity
+- name: CartLine
+  description: One merchandise line on a cart.
+  fields: 11
+  relationships:
+  - {kind: has_one, target: Merchandise, via: merchandise}
+  - {kind: has_one, target: CartLineCost, via: cost}
+  - {kind: has_one, target: SellingPlanAllocation, via: sellingPlanAllocation}
+  - {kind: has_many, target: CartDiscountAllocation, via: discountAllocations}
+  - {kind: has_one, target: CartLineParentRelationship, via: parentRelationship}
+- name: Customer
+  description: A signed-in Kate Farms shopper. Requires a customer access token or
+    the OIDC Customer Accounts flow.
+  fields: 18
+  relationships:
+  - {kind: has_many, target: Order, via: orders}
+  - {kind: has_many, target: MailingAddress, via: addresses}
+  - {kind: has_one, target: MailingAddress, via: defaultAddress}
+  - {kind: has_many, target: Metafield, via: metafields}
+- name: Order
+  description: A completed order. Only reachable through an authenticated Customer;
+    there is no anonymous order lookup.
+  fields: 41
+  relationships:
+  - {kind: has_many, target: OrderLineItem, via: lineItems}
+  - {kind: has_one, target: MailingAddress, via: shippingAddress}
+  - {kind: has_one, target: MailingAddress, via: billingAddress}
+  - {kind: has_many, target: DiscountApplication, via: discountApplications}
+  - {kind: has_many, target: Fulfillment, via: successfulFulfillments}
+  - {kind: has_one, target: MoneyV2, via: totalPrice}
+- name: SellingPlanGroup
+  description: A subscription programme attached to a product.
+  fields: 4
+  relationships:
+  - {kind: has_many, target: SellingPlan, via: sellingPlans}
+  - {kind: has_many, target: SellingPlanGroupOption, via: options}
+- name: SellingPlan
+  description: One subscription cadence and price adjustment.
+  fields: 11
+  relationships:
+  - {kind: has_one, target: SellingPlanBillingPolicy, via: billingPolicy}
+  - {kind: has_one, target: SellingPlanDeliveryPolicy, via: deliveryPolicy}
+  - {kind: has_many, target: SellingPlanPriceAdjustment, via: priceAdjustments}
+  - {kind: has_one, target: SellingPlanCheckoutCharge, via: checkoutCharge}
+- name: Blog
+  description: A content blog on the storefront.
+  fields: 10
+  relationships:
+  - {kind: has_many, target: Article, via: articles}
+  - {kind: has_many, target: ArticleAuthor, via: authors}
+- name: Article
+  description: A storefront article — Kate Farms publishes clinical and lifestyle nutrition
+    content.
+  fields: 19
+  relationships:
+  - {kind: belongs_to, target: Blog, via: blog}
+  - {kind: has_one, target: ArticleAuthor, via: authorV2}
+  - {kind: has_many, target: Comment, via: comments}
+  - {kind: has_one, target: Image, via: image}
+- name: Page
+  description: A static storefront page (policies, education).
+  fields: 12
+- name: Metaobject
+  description: Structured custom content. Kate Farms uses metaobjects for merchandising
+    data beyond the product model.
+  fields: 8
+  relationships:
+  - {kind: has_many, target: MetaobjectField, via: fields}
+- name: Shop
+  description: Store-level metadata and policies.
+  fields: 19
+  relationships:
+  - {kind: has_one, target: PaymentSettings, via: paymentSettings}
+  - {kind: has_one, target: Domain, via: primaryDomain}
+  - {kind: has_one, target: ShopPolicy, via: privacyPolicy}
+  - {kind: has_one, target: ShopPolicy, via: termsOfService}
+  - {kind: has_one, target: ShopPolicy, via: refundPolicy}
+  - {kind: has_one, target: ShopPolicy, via: shippingPolicy}
+- name: Location
+  description: A physical location backing store availability.
+  fields: 5
+  relationships:
+  - {kind: has_one, target: LocationAddress, via: address}
+polymorphism:
+  interfaces:
+  - Node
+  - HasMetafields
+  - Media
+  - BaseCartLine
+  - MenuItemResource
+  unions:
+  - Merchandise
+  - PricingValue
+  - MetafieldParentResource
+  - SearchResultItem
+summary:
+  entities_documented: 16
+  schema_types_total: 424
+  connection_types: 29
+  root_query_fields: 35
+  root_mutation_fields: 41
+render: null

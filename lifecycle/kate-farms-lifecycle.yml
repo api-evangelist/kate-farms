@@ -1,0 +1,69 @@
+generated: '2026-08-04'
+method: probed
+source: 'publicApiVersions query against https://shop.katefarms.com/api/2026-01/graphql.json
+  + https://shop.katefarms.com/.well-known/ucp'
+versioning:
+  scheme: calendar-version in the URL path
+  format: https://shop.katefarms.com/api/YYYY-MM/graphql.json
+  cadence: quarterly
+  current_stable: '2026-07'
+  captured_against: '2026-01'
+  response_header: x-shopify-api-version
+  docs: https://shopify.dev/docs/api/usage/versioning
+  supported_versions:
+  - version: '2025-10'
+    supported: true
+  - version: '2026-01'
+    supported: true
+  - version: '2026-04'
+    supported: true
+  - version: '2026-07'
+    supported: true
+    latest: true
+  - version: '2026-10'
+    supported: false
+    stage: release candidate
+  - version: unstable
+    supported: false
+  note: Read live from the publicApiVersions root field on 2026-08-04. Four calendar
+    versions were simultaneously supported, giving roughly a twelve-month support window.
+protocol_versioning:
+  ucp:
+    current: '2026-04-08'
+    supported:
+    - '2026-04-08'
+    - '2026-01-23'
+    source: https://shop.katefarms.com/.well-known/ucp
+deprecation:
+  policy_url: https://shopify.dev/docs/api/usage/versioning
+  sunset_header: false
+  mechanism: GraphQL @deprecated directive on fields and enum values, plus quarterly
+    version retirement
+  deprecated_fields_observed: true
+  examples:
+  - Product.descriptionHtml/priceRange V2 duplicates (compareAtPriceV2, priceV2, unitPrice
+    variants)
+  - Order total*V2 duplicates alongside the non-V2 fields
+  note: Deprecation is signalled in-schema, not by RFC 8594 Sunset/Deprecation HTTP
+    headers. The policy is Shopify's platform policy, not a Kate Farms document.
+  x-provenance: platform (Shopify)
+sla:
+  url: null
+  uptime_target: null
+  note: Kate Farms publishes no API SLA. It is a merchant, not an API vendor.
+status_page: null
+status_page_note: No Kate Farms status page was found. The underlying platform status
+  is at https://www.shopifystatus.com/, which Kate Farms does not itself publish or
+  reference.
+changelog: null
+changelog_note: Kate Farms publishes no API changelog. The Storefront API changelog
+  is Shopify's (https://shopify.dev/changelog) and is not a Kate Farms artifact.
+deprecated_operations: []
+x-evidence:
+- url: https://shop.katefarms.com/api/2026-01/graphql.json
+  http_status: 200
+  query: publicApiVersions
+  fetched: '2026-08-04'
+- url: https://shop.katefarms.com/.well-known/ucp
+  http_status: 200
+  fetched: '2026-08-04'

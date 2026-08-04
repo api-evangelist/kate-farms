@@ -1,0 +1,201 @@
+generated: '2026-08-04'
+method: derived
+source: graphql/kate-farms-storefront.graphql
+format: graphql-user-errors
+note: 'Kate Farms publishes no OpenAPI and no RFC 9457 problem+json surface. Errors
+  on the live Storefront GraphQL endpoint are GraphQL-native: transport-level failures
+  come back as HTTP 200 with an errors[] array, and business failures come back as
+  a typed userErrors[] on the mutation payload with an enum code. Every type and enum
+  value below was read verbatim from the introspected schema.'
+envelope:
+  transport_errors:
+    http_status: 200
+    field: errors[]
+    members:
+    - message
+    - locations
+    - path
+    - extensions
+  business_errors:
+    field: userErrors[] (per mutation payload)
+    members:
+    - field
+    - message
+    - code
+error_types:
+- type: CartUserError
+  code_enum: CartErrorCode
+  code_count: 57
+  applies_to: cart mutations (cartCreate, cartLinesAdd/Update/Remove, cartDiscountCodesUpdate,
+    cartDeliveryAddressesAdd/Update/Replace/Remove, cartSelectedDeliveryOptionsUpdate,
+    cartBuyerIdentityUpdate, cartPaymentUpdate, cartMetafieldsSet, ...)
+- type: CartOperationError
+  applies_to: cart line operations that partially fail
+- type: CustomerUserError
+  code_enum: CustomerErrorCode
+  applies_to: customerCreate, customerUpdate, customerActivate, customerRecover, customerReset,
+    customerAddress* mutations
+- type: SubmissionError
+  code_enum: SubmissionErrorCode
+  applies_to: cartSubmitForCompletion — validation of buyer identity and delivery address
+    before submission
+- type: CompletionError
+  code_enum: CompletionErrorCode
+  applies_to: cartCompletionAttempt — inventory reservation and payment outcomes
+- type: UserErrorsShopPayPaymentRequestSessionUserErrors
+  code_enum: UserErrorsShopPayPaymentRequestSessionUserErrorsCode
+  applies_to: shopPayPaymentRequestSessionCreate, shopPayPaymentRequestSessionSubmit
+- type: MetafieldsSetUserError
+  code_enum: MetafieldsSetUserErrorCode
+  applies_to: cartMetafieldsSet
+- type: MetafieldDeleteUserError
+  code_enum: MetafieldDeleteErrorCode
+  applies_to: cartMetafieldDelete
+- type: UserError
+  applies_to: generic mutation payloads without a typed code
+problems:
+- code: SERVICE_UNAVAILABLE
+  type: CartErrorCode
+  title: Cart service temporarily unavailable
+  remediation: Retry with backoff. Cart mutations carry no idempotency key, so re-check
+    cart state before re-issuing.
+- code: CART_TOO_LARGE
+  type: CartErrorCode
+  title: Cart exceeds the maximum size
+  remediation: Split the order across carts.
+- code: INVALID_MERCHANDISE_LINE
+  type: CartErrorCode
+  title: Merchandise line is invalid
+  remediation: Re-resolve the ProductVariant id from the catalog before adding.
+- code: MERCHANDISE_NOT_APPLICABLE
+  type: CartErrorCode
+  title: Merchandise cannot be added to this cart
+  remediation: Check variant availability and selling-plan requirements.
+- code: VARIANT_REQUIRES_SELLING_PLAN
+  type: CartErrorCode
+  title: Variant can only be purchased on a subscription
+  remediation: Attach a sellingPlanId from ProductVariant.sellingPlanAllocations. Relevant
+    for Kate Farms subscription SKUs.
+- code: SELLING_PLAN_NOT_APPLICABLE
+  type: CartErrorCode
+  title: Selling plan does not apply to this variant
+  remediation: Re-read sellingPlanAllocations for the variant.
+- code: MINIMUM_NOT_MET
+  type: CartErrorCode
+  title: Quantity is below the variant minimum
+  remediation: Read ProductVariant.quantityRule.minimum. Kate Farms sells by the case,
+    so this fires often.
+- code: MAXIMUM_EXCEEDED
+  type: CartErrorCode
+  title: Quantity is above the variant maximum
+  remediation: Read ProductVariant.quantityRule.maximum.
+- code: INVALID_INCREMENT
+  type: CartErrorCode
+  title: Quantity is not a valid increment
+  remediation: Read ProductVariant.quantityRule.increment.
+- code: MISSING_CUSTOMER_ACCESS_TOKEN
+  type: CartErrorCode
+  title: Operation requires a signed-in shopper
+  remediation: Obtain a customer access token or complete the OIDC Customer Accounts
+    flow.
+- code: PENDING_DELIVERY_GROUPS
+  type: CartErrorCode
+  title: Delivery groups are still being calculated
+  remediation: Re-query the cart until deliveryGroups resolve, then select a delivery
+    option.
+- code: ZIP_CODE_NOT_SUPPORTED
+  type: CartErrorCode
+  title: Destination postal code is not serviceable
+  remediation: Kate Farms ships within the United States; collect a supported US address.
+- code: INVALID_ZIP_CODE_FOR_COUNTRY
+  type: CartErrorCode
+  title: Postal code does not match the country
+  remediation: Re-validate the address before retrying.
+- code: ADDRESS_FIELD_IS_REQUIRED
+  type: CartErrorCode
+  title: A required address field is missing
+  remediation: Fill address1, city, province, zip and country.
+- code: PAYMENTS_CREDIT_CARD_NUMBER_INVALID
+  type: CartErrorCode
+  title: Card number is invalid
+  remediation: Re-collect payment details; never retry the same card blindly.
+- code: PAYMENTS_CREDIT_CARD_YEAR_EXPIRED
+  type: CartErrorCode
+  title: Card has expired
+  remediation: Re-collect payment details.
+- code: NO_DELIVERY_GROUP_SELECTED
+  type: SubmissionErrorCode
+  title: No delivery group was selected before submission
+  remediation: Call cartSelectedDeliveryOptionsUpdate before cartSubmitForCompletion.
+- code: BUYER_IDENTITY_EMAIL_REQUIRED
+  type: SubmissionErrorCode
+  title: Buyer email is required
+  remediation: Call cartBuyerIdentityUpdate with a valid email.
+- code: DELIVERY_NO_DELIVERY_AVAILABLE
+  type: SubmissionErrorCode
+  title: No delivery method is available for this destination
+  remediation: Offer an alternative address or a retail pickup location.
+- code: MERCHANDISE_LINE_LIMIT_REACHED
+  type: SubmissionErrorCode
+  title: Too many merchandise lines on the cart
+  remediation: Consolidate lines or split the order.
+- code: INVENTORY_RESERVATION_ERROR
+  type: CompletionErrorCode
+  title: Inventory could not be reserved
+  remediation: Re-check availability and resubmit; do not treat as a payment failure.
+- code: PAYMENT_CARD_DECLINED
+  type: CompletionErrorCode
+  title: Card was declined
+  remediation: Ask the buyer for a different payment method. Do not retry automatically.
+- code: PAYMENT_CALL_ISSUER
+  type: CompletionErrorCode
+  title: Issuer requires contact
+  remediation: Buyer must contact their card issuer.
+- code: PAYMENT_INSUFFICIENT_FUNDS
+  type: CompletionErrorCode
+  title: Insufficient funds
+  remediation: Ask the buyer for a different payment method.
+- code: PAYMENT_TRANSIENT_ERROR
+  type: CompletionErrorCode
+  title: Transient payment failure
+  remediation: The only completion error that is safe to retry; back off first.
+- code: PAYMENT_INVALID_PAYMENT_METHOD
+  type: CompletionErrorCode
+  title: Payment method is invalid for this order
+  remediation: Re-negotiate the payment handler (Google Pay, Shopify Card, Shop Pay).
+- code: PAYMENT_AMOUNT_TOO_SMALL
+  type: CompletionErrorCode
+  title: Order total is below the minimum chargeable amount
+  remediation: Add items or apply a different discount.
+- code: IDEMPOTENCY_KEY_ALREADY_USED
+  type: UserErrorsShopPayPaymentRequestSessionUserErrorsCode
+  title: The supplied idempotencyKey has already been consumed
+  remediation: Treat as a duplicate submission; poll for the existing result rather
+    than re-submitting with a new key.
+- code: PAYMENT_REQUEST_NOT_FOUND
+  type: UserErrorsShopPayPaymentRequestSessionUserErrorsCode
+  title: Shop Pay payment request session not found
+  remediation: Re-create the session with shopPayPaymentRequestSessionCreate.
+- code: PAYMENT_REQUEST_INVALID_INPUT
+  type: UserErrorsShopPayPaymentRequestSessionUserErrorsCode
+  title: Shop Pay payment request input is invalid
+  remediation: Re-validate the ShopPayPaymentRequestInput against the schema.
+mcp_errors:
+- code: -32001
+  message: UCP discovery failed
+  data_code: invalid_profile_url
+  http_status: 422
+  observed: '2026-08-04'
+  remediation: Publish a resolvable UCP agent profile URI and present it on the request
+    before calling tools/list.
+x-evidence:
+  fetched: '2026-08-04'
+  source_artifact: graphql/kate-farms-storefront.graphql
+  enums_read:
+  - CartErrorCode
+  - SubmissionErrorCode
+  - CompletionErrorCode
+  - CustomerErrorCode
+  - MetafieldsSetUserErrorCode
+  - MetafieldDeleteErrorCode
+  - UserErrorsShopPayPaymentRequestSessionUserErrorsCode

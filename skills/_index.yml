@@ -1,0 +1,42 @@
+generated: '2026-08-04'
+method: generated
+source: graphql/kate-farms-storefront.graphql + mcp/kate-farms-mcp.yml + llms/kate-farms-agents.md
+note: Every GraphQL field and MCP tool named in these skills was verified verbatim
+  against the introspected schema or against Kate Farms' own published agent document.
+  No operation names were invented.
+skills:
+- file: kate-farms-browse-catalog.md
+  name: Browse the Kate Farms catalog
+  api: graphql/kate-farms-storefront.graphql
+  operations:
+  - products
+  - search
+  - predictiveSearch
+  - collection
+  - collections
+  - productByHandle
+  - productRecommendations
+- file: kate-farms-build-cart-and-checkout.md
+  name: Build a Kate Farms cart and take it to checkout
+  api: graphql/kate-farms-storefront.graphql
+  operations:
+  - cartCreate
+  - cartLinesAdd
+  - cartLinesUpdate
+  - cartLinesRemove
+  - cartBuyerIdentityUpdate
+  - cartDeliveryAddressesAdd
+  - cartSelectedDeliveryOptionsUpdate
+  - cartDiscountCodesUpdate
+  - cartPrepareForCompletion
+  - cartSubmitForCompletion
+  - cartCompletionAttempt
+- file: kate-farms-agentic-commerce-ucp.md
+  name: Transact with Kate Farms over UCP / MCP
+  api: mcp/kate-farms-mcp.yml
+  operations:
+  - search_catalog
+  - create_cart
+  - create_checkout
+  - update_checkout
+  - complete_checkout

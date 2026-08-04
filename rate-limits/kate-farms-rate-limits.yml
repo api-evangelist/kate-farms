@@ -1,0 +1,46 @@
+generated: '2026-08-04'
+method: probed
+source: observed responses from https://shop.katefarms.com/api/2026-01/graphql.json
+  + https://shop.katefarms.com/agents.md
+rate_limits:
+- api: Kate Farms Storefront GraphQL API
+  endpoint: https://shop.katefarms.com/api/2026-01/graphql.json
+  style: query-cost
+  signal_field: extensions.cost.requestedQueryCost
+  limit_count: null
+  window: null
+  headers_observed: []
+  retry_signal: HTTP 429
+  observed:
+  - query: '{ shop { name } }'
+    requestedQueryCost: 1
+  - query: publicApiVersions + shop + policies
+    requestedQueryCost: 8
+  - query: full introspection
+    requestedQueryCost: not returned
+  note: Every response carries an extensions.cost block, so an agent can measure the
+    cost of a query, but neither a throttleStatus block nor any X-RateLimit-* header
+    was returned on the anonymous responses observed. The concrete ceiling is a Shopify
+    platform limit that Kate Farms does not publish.
+- api: Kate Farms UCP Agentic Commerce (MCP)
+  endpoint: https://shop.katefarms.com/api/ucp/mcp
+  style: per-IP
+  limit_count: null
+  window: null
+  retry_signal: HTTP 429
+  policy_statement: 'Respect rate limits. The MCP endpoint is rate-limited per IP.
+    Back off on 429 responses.'
+  policy_source: https://shop.katefarms.com/agents.md
+  note: Kate Farms states the policy in its own agent-facing document but publishes
+    no numeric limit.
+- api: Storefront JSON endpoints
+  endpoint: https://shop.katefarms.com/products.json
+  style: unpublished
+  limit_count: null
+  note: The product/collection JSON endpoints documented in agents.md returned 200
+    anonymously with no rate-limit headers.
+x-evidence:
+  fetched: '2026-08-04'
+  headers_seen:
+  - x-request-id
+  - x-shopify-api-version

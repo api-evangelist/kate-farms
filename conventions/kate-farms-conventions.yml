@@ -1,0 +1,132 @@
+generated: '2026-08-04'
+method: derived
+source: graphql/kate-farms-storefront.graphql + llms/kate-farms-agents.md + observed
+  response headers on https://shop.katefarms.com/api/2026-01/graphql.json
+authentication:
+  style: none for public storefront reads; apiKey header (X-Shopify-Storefront-Access-Token)
+    for the documented client credential; OIDC authorization-code + PKCE for shopper
+    identity; UCP agent profile for the MCP endpoint
+  detail: authentication/kate-farms-authentication.yml
+  scopes: scopes/kate-farms-scopes.yml
+idempotency:
+  supported: true
+  scope: partial
+  mechanism: GraphQL argument
+  parameter: idempotencyKey
+  operations:
+  - shopPayPaymentRequestSessionSubmit
+  conflict_error: IDEMPOTENCY_KEY_ALREADY_USED (UserErrorsShopPayPaymentRequestSessionUserErrorsCode)
+  retention: not published
+  note: 'Idempotency is real but narrow. The single idempotency-keyed operation in
+    the whole live schema is shopPayPaymentRequestSessionSubmit, where idempotencyKey
+    is a required String!. Cart mutations (cartCreate, cartLinesAdd, cartSubmitForCompletion)
+    take no idempotency key, so a retried cart submission is not deduplicated by the
+    API — agents must guard those themselves via cartCompletionAttempt polling.'
+  evidence: graphql/kate-farms-storefront.graphql
+pagination:
+  style: cursor
+  spec: GraphQL Cursor Connections (Relay)
+  request_params:
+  - first
+  - last
+  - after
+  - before
+  - reverse
+  response_fields:
+  - edges
+  - node
+  - cursor
+  - pageInfo.hasNextPage
+  - pageInfo.hasPreviousPage
+  - pageInfo.startCursor
+  - pageInfo.endCursor
+  connection_types_in_schema: 29
+  note: Every list surface (products, collections, articles, orders, cart lines) is
+    a Relay connection. There is no offset/page-number pagination anywhere in the schema.
+field_selection:
+  style: GraphQL field selection
+  note: Sparse fieldsets and expansion are inherent to GraphQL — the client names exactly
+    the fields it wants; there is no expand= parameter.
+  fragments: interfaces (Node, HasMetafields, Media, Merchandise) and unions are used
+    for polymorphic selection
+metadata:
+  mechanism: metafields + metaobjects
+  fields:
+  - metafield(namespace, key)
+  - metafields(identifiers)
+  - metaobject
+  - metaobjects
+  cart_metadata:
+  - cartAttributesUpdate
+  - cartMetafieldsSet
+  - cartMetafieldDelete
+  - cartNoteUpdate
+  note: Kate Farms uses Shopify metaobjects for structured merchandising content, reachable
+    anonymously.
+request_tracing:
+  header: x-request-id
+  observed: '26835c85-e1e8-4ede-a98f-0fc3dfed282e-1785877893'
+  note: Returned on every Storefront GraphQL response; quote it in support contacts.
+versioning:
+  scheme: calendar version in the URL path
+  format: /api/YYYY-MM/graphql.json
+  response_header: x-shopify-api-version
+  current_stable: '2026-07'
+  captured_against: '2026-01'
+  detail: lifecycle/kate-farms-lifecycle.yml
+error_envelope:
+  transport: HTTP 200 with a GraphQL errors[] array for protocol/validation failures
+  business_errors: typed userErrors[] on every mutation payload, never HTTP status
+    codes
+  user_error_types:
+  - CartUserError
+  - CartOperationError
+  - CustomerUserError
+  - MetafieldsSetUserError
+  - MetafieldDeleteUserError
+  - UserErrorsShopPayPaymentRequestSessionUserErrors
+  - SubmissionError
+  - CompletionError
+  - UserError
+  format: not RFC 9457; GraphQL-native typed errors with enum codes
+  catalog: errors/kate-farms-problem-types.yml
+  jsonrpc_errors: 'The UCP MCP endpoint uses JSON-RPC 2.0 error objects (observed: code
+    -32001, message "UCP discovery failed", data.code invalid_profile_url) over HTTP
+    422.'
+rate_limiting:
+  style: query-cost based (GraphQL), per-IP (MCP)
+  response_field: extensions.cost.requestedQueryCost
+  observed_costs:
+  - query: '{ shop { name } }'
+    requestedQueryCost: 1
+  - query: publicApiVersions + shop with policies
+    requestedQueryCost: 8
+  retry_signal: 429 (agents.md instructs back-off on 429 from the MCP endpoint)
+  headers: no X-RateLimit-* headers observed on the Storefront endpoint
+  detail: rate-limits/kate-farms-rate-limits.yml
+agent_rules:
+  source: https://shop.katefarms.com/agents.md
+  rules:
+  - Checkout requires contemporaneous human approval; an agent must not complete payment
+    without explicit buyer consent.
+  - Respect per-IP rate limits on the MCP endpoint; back off on 429.
+  - Pass context.address_country and context.currency for accurate pricing and availability.
+  - Prefer the UCP MCP endpoint or the Shop skill over screen-scraping the storefront.
+read_only_surfaces:
+  documented_in: llms/kate-farms-agents.md
+  endpoints:
+  - GET /collections/all
+  - GET /products/{handle}
+  - GET /products/{handle}.json
+  - GET /collections/{handle}
+  - GET /collections/{handle}/products.json
+  - GET /search?q={query}&type=product
+  - GET /sitemap.xml
+  authentication: none
+  verified: '2026-08-04'
+cross_links:
+  errors: errors/kate-farms-problem-types.yml
+  lifecycle: lifecycle/kate-farms-lifecycle.yml
+  authentication: authentication/kate-farms-authentication.yml
+  rate_limits: rate-limits/kate-farms-rate-limits.yml
+  data_model: data-model/kate-farms-data-model.yml

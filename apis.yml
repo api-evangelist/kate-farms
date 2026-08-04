@@ -1,23 +1,140 @@
 aid: kate-farms
 name: Kate Farms
-description: 'Kate Farms is a company surfaced via the API Evangelist harvest backlog (source: secondary-market)
-  and added to the network as a stub for full-pipeline profiling.'
+description: 'Kate Farms is a Santa Barbara, California nutrition company that makes
+  USDA-certified-organic, plant-based (organic yellow pea protein) medical nutrition
+  formulas and shakes for tube feeding and oral supplemental nutrition, used in more
+  than 1,400 hospitals and prescribed across pediatric and adult care. The company
+  sells direct to consumers through a Shopify storefront at shop.katefarms.com and
+  publishes clinical and reimbursement material for healthcare professionals at katefarmsmedical.com.
+  Its public machine-readable surface is commerce-side rather than a developer product:
+  the storefront exposes an anonymous-introspectable Shopify Storefront GraphQL API,
+  an agent-facing llms.txt / agents.md, and a live Universal Commerce Protocol (UCP)
+  merchant profile with an MCP endpoint for agent-driven catalog search, cart and
+  checkout.'
+image: https://cdn.shopify.com/s/files/1/0205/6802/files/KF_Logo_Navy_TM.png
 url: https://raw.githubusercontent.com/api-evangelist/kate-farms/refs/heads/main/apis.yml
 x-type: company
 x-source: harvest:secondary-market
-x-tier: stub
-x-tier-reason: harvest
 specificationVersion: '0.20'
 created: '2026-08-04'
 modified: '2026-08-04'
 tags:
 - Company
-apis: []
+- Nutrition
+- Medical Nutrition
+- Health
+- Food and Beverage
+- Consumer Packaged Goods
+- E-Commerce
+- Agentic Commerce
+- Retail
+- Shopify
+- GraphQL
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
+apis:
+- name: Kate Farms Storefront GraphQL API
+  description: 'The Shopify Storefront GraphQL API as deployed on Kate Farms'' own
+    host. Anonymous introspection succeeded on 2026-08-04, returning 424 types, 35
+    root query fields and 41 mutations covering products, collections, search, predictive
+    search, blogs/articles, pages, metaobjects, cart lifecycle, customer accounts and
+    Shop Pay payment request sessions. The schema is the Shopify platform contract;
+    the data and the endpoint are Kate Farms''.'
+  humanURL: https://shop.katefarms.com/agents.md
+  baseURL: https://shop.katefarms.com/api/2026-01/graphql.json
+  tags:
+  - GraphQL
+  - E-Commerce
+  - Catalog
+  - Cart
+  - Checkout
+  properties:
+  - type: GraphQL
+    url: graphql/kate-farms-storefront.graphql
+  - type: APIReference
+    url: https://shopify.dev/docs/api/storefront
+    x-note: Platform reference published by Shopify, not by Kate Farms; it is the reference
+      a developer uses to call this host.
+- name: Kate Farms UCP Agentic Commerce (MCP)
+  description: 'Kate Farms'' storefront advertises the Universal Commerce Protocol
+    (UCP) at /.well-known/ucp and exposes an MCP endpoint for agent-driven commerce
+    — catalog search and lookup, cart, discount, fulfillment, checkout and order capabilities,
+    with Google Pay, Shopify Card and Shop Pay payment handlers. tools/list is gated:
+    the server requires a resolvable UCP agent profile URI and returns JSON-RPC error
+    -32001 invalid_profile_url to anonymous callers, so tool input schemas require
+    an enrolled agent profile.'
+  humanURL: https://shop.katefarms.com/llms.txt
+  baseURL: https://shop.katefarms.com/api/ucp/mcp
+  tags:
+  - MCP
+  - UCP
+  - Agentic Commerce
+  - Checkout
+  properties:
+  - type: MCPServer
+    url: mcp/kate-farms-mcp.yml
+  - type: ToolCrosswalk
+    url: mcp/kate-farms-tool-crosswalk.yml
 common:
 - type: Website
-  url: https://forgeglobal.com/kate-farms_stock/
+  url: https://katefarms.com/
+- type: Documentation
+  url: https://shop.katefarms.com/agents.md
+- type: GettingStarted
+  url: https://shop.katefarms.com/agents.md
+- type: LLMsTxt
+  url: llms/kate-farms-llms.txt
+- type: WellKnown
+  url: well-known/kate-farms-well-known.yml
+- type: Authentication
+  url: authentication/kate-farms-authentication.yml
+- type: OAuthScopes
+  url: scopes/kate-farms-scopes.yml
+- type: Conventions
+  url: conventions/kate-farms-conventions.yml
+- type: Idempotency
+  url: conventions/kate-farms-conventions.yml
+- type: ErrorCatalog
+  url: errors/kate-farms-problem-types.yml
+- type: Lifecycle
+  url: lifecycle/kate-farms-lifecycle.yml
+- type: DataModel
+  url: data-model/kate-farms-data-model.yml
+- type: Conformance
+  url: conformance/kate-farms-conformance.yml
+- type: DomainSecurity
+  url: security/kate-farms-domain-security.yml
+- type: RateLimits
+  url: rate-limits/kate-farms-rate-limits.yml
+- type: AgentSkill
+  url: skills/_index.yml
+- type: Support
+  url: https://katefarms.com/contact-us
+- type: HelpCenter
+  url: https://katefarms.com/help
+- type: SignUp
+  url: https://shop.katefarms.com/account/register
+- type: Login
+  url: https://shop.katefarms.com/account/login
+- type: TermsOfService
+  url: https://shop.katefarms.com/policies/terms-of-service
+- type: PrivacyPolicy
+  url: https://katefarms.com/privacy-policy/
+- type: TermsOfUse
+  url: https://katefarms.com/terms-of-use/
+- type: Accessibility
+  url: https://katefarms.com/accessibility/
+- type: Careers
+  url: https://katefarms.com/careers/
+- type: About
+  url: https://katefarms.com/about/
+- type: HealthcareProfessionals
+  url: https://katefarmsmedical.com/
+x-enrichment:
+  date: '2026-08-04'
+  status: enriched
+  artifacts_added: 23
+  pass: local-v1

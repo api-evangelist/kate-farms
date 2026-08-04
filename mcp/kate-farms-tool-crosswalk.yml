@@ -1,0 +1,161 @@
+generated: '2026-08-04'
+method: derived
+source: mcp/kate-farms-mcp.yml + graphql/kate-farms-storefront.graphql
+note: 'Kate Farms publishes no OpenAPI. The machine-readable core it does publish is
+  the Shopify Storefront GraphQL schema captured by anonymous introspection, so this
+  crosswalk binds each UCP MCP tool to the GraphQL fields that back the same capability
+  rather than to REST operationIds. Every GraphQL field named below was verified verbatim
+  in graphql/kate-farms-storefront.graphql. The MCP tools/list call is gated on a UCP
+  agent profile, so tools are mapped by published name and UCP capability semantics,
+  not by a retrieved inputSchema — confidences are set accordingly.'
+surfaces:
+  openapi: null
+  graphql:
+    endpoint: https://shop.katefarms.com/api/2026-01/graphql.json
+    artifact: graphql/kate-farms-storefront.graphql
+    introspection: open
+    gated: false
+  mcp:
+    endpoint: https://shop.katefarms.com/api/ucp/mcp
+    artifact: mcp/kate-farms-mcp.yml
+    tools_list: gated
+    gated: true
+    gate: UCP agent profile URI required (JSON-RPC -32001 invalid_profile_url)
+  rest:
+    endpoint: https://shop.katefarms.com/products.json
+    kind: Shopify storefront product/collection JSON endpoints
+    documented_in: llms/kate-farms-agents.md
+    spec: none published
+crosswalk:
+- tool: search_catalog
+  category: catalog
+  binding: graphql
+  graphql:
+  - products
+  - search
+  - predictiveSearch
+  - collection
+  - productByHandle
+  - productRecommendations
+  confidence: high
+  note: The UCP catalog.search capability and the Storefront query fields project the
+    same catalog. Exact argument shape differs between the two surfaces.
+- tool: create_cart
+  category: cart
+  binding: graphql
+  graphql:
+  - cartCreate
+  - cartLinesAdd
+  - cartLinesUpdate
+  - cartLinesRemove
+  confidence: high
+  note: cartCreate accepts lines inline; cartLinesAdd/Update/Remove maintain them afterwards.
+- tool: create_checkout
+  category: checkout
+  binding: graphql
+  graphql:
+  - cartPrepareForCompletion
+  - Cart.checkoutUrl
+  confidence: medium
+  note: The Storefront API has no single createCheckout mutation. A cart becomes a
+    checkout either by handing the buyer Cart.checkoutUrl or by calling cartPrepareForCompletion
+    ahead of submission.
+- tool: update_checkout
+  category: fulfillment
+  binding: graphql
+  graphql:
+  - cartBuyerIdentityUpdate
+  - cartDeliveryAddressesAdd
+  - cartDeliveryAddressesUpdate
+  - cartSelectedDeliveryOptionsUpdate
+  - cartDiscountCodesUpdate
+  confidence: medium
+  note: One UCP tool fans out to several cart mutations — buyer identity, delivery
+    address, selected delivery option and discount codes are separate mutations on
+    the GraphQL side.
+- tool: complete_checkout
+  category: checkout
+  binding: graphql
+  graphql:
+  - cartSubmitForCompletion
+  - cartCompletionAttempt
+  confidence: medium
+  note: cartSubmitForCompletion submits; cartCompletionAttempt polls the result. UCP
+    additionally requires contemporaneous buyer approval of payment, which has no GraphQL
+    equivalent — it is a protocol-level obligation on the agent.
+mcp_only:
+- tool: complete_checkout
+  reason: The buyer-approval invariant and the UCP payment-handler negotiation (Google
+    Pay / Shopify Card / Shop Pay) are protocol behaviour with no counterpart field
+    in the Storefront GraphQL schema.
+- capability: dev.ucp.shopping.order
+  reason: UCP declares an order capability, but Storefront GraphQL only exposes Order
+    through an authenticated Customer context (customer.orders); there is no anonymous
+    order-lookup field.
+graphql_only:
+- fields:
+  - blog
+  - blogs
+  - article
+  - articles
+  - page
+  - pages
+  - metaobject
+  - metaobjects
+  - menu
+  - sitemap
+  - urlRedirects
+  reason: Content and navigation surfaces. UCP shopping capabilities cover commerce
+    only, so Kate Farms' articles, pages and metaobjects are reachable via GraphQL
+    but not via any advertised MCP tool.
+- fields:
+  - customerAccessTokenCreate
+  - customerCreate
+  - customerUpdate
+  - customerRecover
+  - customerReset
+  - customerAddressCreate
+  - customerAddressUpdate
+  - customerAddressDelete
+  - customerDefaultAddressUpdate
+  reason: Shopper account management. Agent access to the same surface is instead gated
+    behind the customer-account-mcp-api:full OIDC scope.
+- fields:
+  - shopPayPaymentRequestSessionCreate
+  - shopPayPaymentRequestSessionSubmit
+  - shopPayInstallmentsPricing
+  reason: Shop Pay session handling, including the only idempotencyKey argument in
+    the whole schema. UCP routes Shop Pay through its own payment handler instead.
+- fields:
+  - locations
+  - localization
+  - paymentSettings
+  - shop
+  reason: Store metadata and store-availability lookups.
+- fields:
+  - cartGiftCardCodesAdd
+  - cartGiftCardCodesRemove
+  - cartGiftCardCodesUpdate
+  - cartMetafieldsSet
+  - cartMetafieldDelete
+  - cartAttributesUpdate
+  - cartNoteUpdate
+  - cartClone
+  - cartRemovePersonalData
+  - cartBillingAddressUpdate
+  - cartPaymentUpdate
+  reason: Cart operations with no named UCP tool in the published agent flow.
+rest_only: []
+coverage:
+  mcp_tools_named: 5
+  mcp_tools_bound: 5
+  mcp_tools_with_retrieved_schema: 0
+  mcp_only: 2
+  graphql_query_fields_total: 35
+  graphql_mutation_fields_total: 41
+  graphql_fields_bound_to_a_tool: 16
+  openapi_operations_total: 0
+x-evidence:
+  fetched: '2026-08-04'
+  graphql_introspection: 200 (424 types)
+  mcp_tools_list: 422 (gated)
