@@ -17,7 +17,7 @@ server:
   platform: Shopify
 introspection:
   attempted: '2026-08-04'
-  method: 'POST {"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+  method: POST {"jsonrpc":"2.0","id":1,"method":"tools/list"}
   http_status: 422
   gated: true
   error:
@@ -25,11 +25,10 @@ introspection:
     message: UCP discovery failed
     data_code: invalid_profile_url
     detail: 'Unable to fetch agent profile: Missing profile uri'
-  note: The server requires a resolvable UCP agent profile URI before it answers tools/list,
-    so live tool input schemas could not be retrieved anonymously. The tool names below
-    are the ones Kate Farms itself publishes in its agents.md / llms.txt agent flow;
-    their argument schemas are defined by the UCP shopping OpenRPC schema linked above,
-    not authored here.
+  note: The server requires a resolvable UCP agent profile URI before it answers tools/list, so live tool
+    input schemas could not be retrieved anonymously. The tool names below are the ones Kate Farms itself
+    publishes in its agents.md / llms.txt agent flow; their argument schemas are defined by the UCP shopping
+    OpenRPC schema linked above, not authored here.
 tools:
 - name: search_catalog
   description: Find products in the Kate Farms catalog matching a buyer's intent.
@@ -112,11 +111,11 @@ payment_handlers:
   handler: dev.shopify.shop_pay
   version: '2026-04-08'
 rules:
-- Checkout requires contemporaneous human approval; agents must not complete payment
-  without explicit buyer consent (stated in agents.md).
+- Checkout requires contemporaneous human approval; agents must not complete payment without explicit
+  buyer consent (stated in agents.md).
 - The MCP endpoint is rate-limited per IP; back off on 429 (stated in agents.md).
-- Agents should pass context.address_country and context.currency for accurate pricing
-  and availability (stated in agents.md).
+- Agents should pass context.address_country and context.currency for accurate pricing and availability
+  (stated in agents.md).
 x-evidence:
 - url: https://shop.katefarms.com/.well-known/ucp
   http_status: 200
@@ -128,3 +127,11 @@ x-evidence:
 - url: https://shop.katefarms.com/agents.md
   http_status: 200
   file: llms/kate-farms-agents.md
+deployment:
+  mode: remote
+  endpoint: https://shop.katefarms.com/api/ucp/mcp
+  verified: probed
+  probe: live
+  tools: 13
+  checked: '2026-08-12'
+  source: catalog MCP census
