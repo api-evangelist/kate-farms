@@ -15,7 +15,7 @@ image: https://cdn.shopify.com/s/files/1/0205/6802/files/KF_Logo_Navy_TM.png
 url: https://raw.githubusercontent.com/api-evangelist/kate-farms/refs/heads/main/apis.yml
 x-type: company
 x-source: harvest:secondary-market
-specificationVersion: '0.20'
+specificationVersion: '0.23'
 created: '2026-08-04'
 modified: '2026-08-04'
 tags:
