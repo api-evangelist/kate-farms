@@ -11,6 +11,17 @@ description: 'Kate Farms is a Santa Barbara, California nutrition company that m
   an agent-facing llms.txt / agents.md, and a live Universal Commerce Protocol (UCP)
   merchant profile with an MCP endpoint for agent-driven catalog search, cart and
   checkout.'
+deliveryModel:
+  model: saas
+  open_source: false
+  commercial: true
+  callable_host: false
+  label: Hosted service · you call their endpoint
+  confidence: medium
+  source:
+  - pricing
+  generated: '2026-08-28'
+  method: derived
 image: https://cdn.shopify.com/s/files/1/0205/6802/files/KF_Logo_Navy_TM.png
 url: https://raw.githubusercontent.com/api-evangelist/kate-farms/refs/heads/main/apis.yml
 x-type: company
