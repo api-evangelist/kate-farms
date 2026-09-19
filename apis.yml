@@ -96,6 +96,11 @@ apis:
   baseURL: https://shop.katefarms.com/api/ucp/mcp
   tags:
   - MCP
+  - Universal Commerce Protocol
+  - Agentic Commerce
+  - Checkout
+  tags_raw:
+  - MCP
   - UCP
   - Agentic Commerce
   - Checkout
