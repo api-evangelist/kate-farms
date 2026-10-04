@@ -84,6 +84,9 @@ apis:
     url: https://shopify.dev/docs/api/storefront
     x-note: Platform reference published by Shopify, not by Kate Farms; it is the reference
       a developer uses to call this host.
+  x-surface: platform-generated
+  x-platform: shopify
+  x-platform-surface: storefront-graphql
 - name: Kate Farms UCP Agentic Commerce (MCP)
   description: 'Kate Farms'' storefront advertises the Universal Commerce Protocol
     (UCP) at /.well-known/ucp and exposes an MCP endpoint for agent-driven commerce
@@ -109,6 +112,9 @@ apis:
     url: mcp/kate-farms-mcp.yml
   - type: ToolCrosswalk
     url: mcp/kate-farms-tool-crosswalk.yml
+  x-surface: platform-generated
+  x-platform: shopify
+  x-platform-surface: ucp
 common:
 - type: Website
   url: https://katefarms.com/
