@@ -1,0 +1,16 @@
+generated: '2026-10-12'
+method: none
+source:
+- https://zapier.com/apps/kate-farms/integrations
+- https://n8n.io/integrations/kate-farms/
+- https://composio.dev/toolkits/kate-farms
+- https://monid.ai/tools/kate-farms
+checked:
+- https://composio.dev/toolkits/kate-farms
+- https://monid.ai/tools/kate-farms
+- https://n8n.io/integrations/kate-farms/
+- https://zapier.com/apps/kate-farms/integrations
+summary: null
+marketplace_apps: []
+edges: []
+templates: []
